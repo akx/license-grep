@@ -34,6 +34,8 @@ def process_js_manifest(package_json_path, spec_override=None, allow_parent=True
         license = "(%s)" % " OR ".join(licenses) if len(licenses) > 1 else licenses[0]
     else:
         license = data.get("license")
+        if isinstance(license, dict):
+            license = license['type']
 
     if not license:
         license = deduce_license_from_dir(package_json_dir)
