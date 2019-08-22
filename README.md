@@ -1,5 +1,5 @@
 # license-grep
 
-## Figure out licenses for the current Python/NPM/Bower environment.
+## Figure out licenses for the current Python/JavaScript environment.
 
-NPM/Bower license acquisition currently requires the `npm-license` and `bower-license` tools.
+JavaScript license acquisition currently requires the `license-checker` tool.

@@ -72,9 +72,6 @@ def process_node_manifest(node_manifest):
     if node_manifest.endswith("package.json"):
         cmd = "license-checker -e json"
         via = "npm"
-    elif node_manifest.endswith("bower.json"):
-        cmd = "bower-license -e json"
-        via = "bower"
     else:
         raise NotImplementedError("Not implemented")
 
