@@ -1,6 +1,6 @@
 # license-grep
 
-Figures out and collates licenses for a Python/JavaScript environment.
+Figures out and collates licenses for a Python/JavaScript/Dart environment.
 
 # Requirements
 
@@ -21,3 +21,16 @@ python3 -m license_grep \
 ```
 
 Also see `--help` :)
+
+# Dart/Flutter support
+
+Very beta, very ad-hoc.
+
+Install the `PyYAML` package, then try
+
+```
+python3 -m license_grep \
+  --dart ./my-app-root \ 
+  --dart-pub-cache ./my-flutter-or-dart-root/.pub-cache/ \
+  --dump-unknown-licenses
+```
