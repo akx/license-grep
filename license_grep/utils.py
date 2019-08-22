@@ -1,24 +1,15 @@
 from fnmatch import fnmatch
 
-EXCLUDE_PATTERNS = [
-    ".git",
-    "__pycache__",
-    "contrib",
-    "docs",
-    "LC_MESSAGES",
-    "tests*",
-    "var",
-    "venv*",
-]
+EXCLUDE_PATTERNS = [".git", "__pycache__", "LC_MESSAGES"]
 
 
 def is_excluded_dir(dir):
     return any(fnmatch(dir, pat) for pat in EXCLUDE_PATTERNS)
 
 
-def strip_versions(data):
-    out_data = {}
-    for key, value in sorted(list(data.items()), reverse=True):
-        key = key.split("@")[0]
-        out_data[key] = value
-    return out_data
+def unique_in_order(lst):
+    seen = set()
+    for obj in lst:
+        if obj not in seen:
+            seen.add(obj)
+            yield obj

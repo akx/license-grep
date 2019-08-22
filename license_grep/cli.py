@@ -1,57 +1,70 @@
 import argparse
-import json
 import sys
 
 from license_grep.js import process_js_environment
-from license_grep.output import write_json, write_license_table, write_grouped_markdown
+from license_grep.licenses import UnknownLicense, license_name_map
+from license_grep.output import (
+    OutputOptions,
+    write_grouped_markdown,
+    write_json,
+    write_license_table,
+)
 from license_grep.python import process_python_environment
-from license_grep.utils import strip_versions
-
-
-def read_data_from_env(directory):
-    data = {}
-    process_js_environment(data, directory)
-
-    print("Processing Python environment", file=sys.stderr)
-    process_python_environment(data)
-    return data
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("-d", "--directory", default=".")
-    ap.add_argument("-r", "--read-json", required=False, type=argparse.FileType("r"))
-    ap.add_argument("-w", "--write-json", required=False, type=argparse.FileType("w"))
-    ap.add_argument("-t", "--write-table", required=False, type=argparse.FileType("w"))
+    ap.add_argument("--js", dest="javascript_roots", action="append", default=[])
+    ap.add_argument("--py", dest="python_roots", action="append", default=[])
+    ap.add_argument("--write-json", required=False, type=argparse.FileType("w"))
+    ap.add_argument("--write-table", required=False, type=argparse.FileType("w"))
     ap.add_argument(
-        "-g", "--write-grouped-markdown", required=False, type=argparse.FileType("w")
+        "--write-grouped-markdown", required=False, type=argparse.FileType("w")
     )
-    ap.add_argument("-s", "--strip-versions", default=False, action="store_true")
+    ap.add_argument("--strip-versions", default=False, action="store_true")
+    ap.add_argument("--dump-unknown-licenses", default=False, action="store_true")
+    ap.add_argument(
+        "--bsd", default="BSD-3-Clause", help="Map 'BSD' to this BSD license variant"
+    )
     args = ap.parse_args()
-    if args.read_json:
-        data = json.load(args.read_json)
-    else:
-        data = read_data_from_env(args.directory)
 
-    print(f"{len(data):d} packages found.", file=sys.stderr)
+    license_name_map.setdefault("BSD", args.bsd)
+    license_name_map["BSD License"] = args.bsd
 
-    if args.strip_versions:
-        data = strip_versions(data)
-        print(f"{len(data):d} packages after stripping versions.", file=sys.stderr)
+    package_infos = []
 
-    for spec, package in data.items():
-        package['spec'] = spec
+    for js_root in args.javascript_roots:
+        package_infos.extend(process_js_environment(js_root))
+
+    for py_root in args.python_roots:
+        package_infos.extend(process_python_environment(py_root))
+
+    print(f"{len(package_infos):d} packages found.", file=sys.stderr)
+    n_unknown = 0
+    for pkg_info in package_infos:
+        for lic in pkg_info.licenses:
+            if isinstance(lic, UnknownLicense):
+                n_unknown += 1
+                if args.dump_unknown_licenses:
+                    print(f"Unknown license for {pkg_info.spec}: <{lic}>")
+    if n_unknown:
+        print(f"{n_unknown} unknown licenses.", file=sys.stderr)
 
     if args.write_json:
-        write_json(data, fp=args.write_json)
+        oo = OutputOptions(strip_versions=args.strip_versions, fp=args.write_json)
+        write_json(package_infos, oo)
         print(f"JSON written to {args.write_json.name}", file=sys.stderr)
 
     if args.write_table:
-        write_license_table(data, fp=args.write_table)
+        oo = OutputOptions(strip_versions=args.strip_versions, fp=args.write_table)
+        write_license_table(package_infos, oo)
         print(f"Markdown table written to {args.write_table.name}", file=sys.stderr)
 
     if args.write_grouped_markdown:
-        write_grouped_markdown(data, fp=args.write_grouped_markdown)
+        oo = OutputOptions(
+            strip_versions=args.strip_versions, fp=args.write_grouped_markdown
+        )
+        write_grouped_markdown(package_infos, oo)
         print(
             f"Markdown written to {args.write_grouped_markdown.name}", file=sys.stderr
         )

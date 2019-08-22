@@ -1,39 +1,34 @@
+from typing import Iterable
+
 import pkg_resources
 
-from license_grep.deduction import convert_nonstandard_license_name
+from license_grep.models import PackageInfo
+
+PYTHON_LICENSE_BLACKLIST = {"OSI Approved", "License:"}
 
 
-def unique_in_order(iter):
-    seen = set()
-    for obj in iter:
-        if obj not in seen:
-            seen.add(obj)
-            yield obj
-
-
-def process_dist(dist):
-    license = None
+def process_dist(dist: pkg_resources.Distribution):
+    licenses = None
     metadata = None
-    if dist.has_metadata("PKG-INFO"):
-        metadata = dist.get_metadata("PKG-INFO")
-    if dist.has_metadata("METADATA"):
-        metadata = dist.get_metadata("METADATA")
+    location = None
+    for metadata_filename in ("METADATA", "PKG-INFO"):
+        if dist.has_metadata(metadata_filename):
+            metadata = dist.get_metadata(metadata_filename)
+            location = dist._get_metadata_path_for_display(metadata_filename)
     if metadata:
         licenses = list(
-            unique_in_order(
-                convert_nonstandard_license_name(name)
-                for name in find_licenses(metadata)
-            )
+            license
+            for license in find_licenses(metadata)
+            if license not in PYTHON_LICENSE_BLACKLIST
         )
-        license = '/'.join(licenses)
-    return {
-        "%s@%s"
-        % (dist.project_name, dist.version): {
-            "via": "python",
-            "version": dist.version,
-            "license": license or None,
-        }
-    }
+    return PackageInfo(
+        name=dist.project_name,
+        version=dist.version,
+        raw_licenses=licenses,
+        location=(location or dist.location),
+        type="Python",
+        context=None,
+    )
 
 
 def find_licenses(metadata):
@@ -48,6 +43,11 @@ def find_licenses(metadata):
                 yield classifier.split(" :: ")[-1]
 
 
-def process_python_environment(data):
-    for dist in pkg_resources.working_set:
-        data.update(process_dist(dist))
+def process_python_environment(root_directory) -> Iterable[PackageInfo]:
+    env = pkg_resources.Environment(search_path=[root_directory])
+    for name in env:
+        for dist in env[name]:
+            pkginfo = process_dist(dist)
+            if pkginfo:
+                pkginfo.context = root_directory
+                yield pkginfo
