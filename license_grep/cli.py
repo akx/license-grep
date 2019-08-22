@@ -12,7 +12,7 @@ def read_data_from_env(directory):
     data = {}
     process_js_environment(data, directory)
 
-    print("Processing Python environment")
+    print("Processing Python environment", file=sys.stderr)
     process_python_environment(data)
     return data
 

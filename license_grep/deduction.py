@@ -1,4 +1,5 @@
 import os
+import re
 
 
 def deduce_license_from_text(text):
@@ -47,3 +48,33 @@ def deduce_license_from_dir(directory):
                 license = deduce_license_from_text(license_fp.read())
                 if license:
                     return license
+
+
+nonstandard_license_name_map = {
+    'Python Software Foundation': 'PSFL',
+    'Apache Software License': 'Apache',
+    'MIT License': 'MIT',
+}
+
+nonstandard_license_substring_map = [
+    ('(GPL)', 'GPL'),
+    ('Mozilla Public License 2.0', 'MPL-2.0'),
+    ('LGPLv3+', 'LGPLv3+'),
+    ('LGPLv2+', 'LGPLv2+'),
+    ('GPLv2+', 'GPLv2+'),
+    ('(LGPL)', 'LGPL'),
+]
+
+
+def convert_nonstandard_license_name(license):
+    if not license:
+        return 'Unknown'
+    if license in nonstandard_license_name_map:
+        return nonstandard_license_name_map[license]
+    for needle, result in nonstandard_license_substring_map:
+        if needle in license:
+            return result
+    license_l = license.lower()
+    if license_l in ('apache 2.0', 'apache license 2.0', 'apache license, version 2.0'):
+        return 'Apache-2.0'
+    return re.sub(' License$', '', license)
