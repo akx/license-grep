@@ -4,10 +4,10 @@ import pkg_resources
 def process_dist(dist):
     license = None
     metadata = None
-    if dist.has_metadata('PKG-INFO'):
-        metadata = dist.get_metadata('PKG-INFO')
-    if dist.has_metadata('METADATA'):
-        metadata = dist.get_metadata('METADATA')
+    if dist.has_metadata("PKG-INFO"):
+        metadata = dist.get_metadata("PKG-INFO")
+    if dist.has_metadata("METADATA"):
+        metadata = dist.get_metadata("METADATA")
     if metadata:
         license = find_license(metadata)
     return {
@@ -15,7 +15,7 @@ def process_dist(dist):
         % (dist.project_name, dist.version): {
             "via": "python",
             "version": dist.version,
-            "license": license or "<no license found>",
+            "license": license or None,
         }
     }
 

@@ -1,15 +1,14 @@
 from fnmatch import fnmatch
 
 EXCLUDE_PATTERNS = [
-    'contrib',
-    'docs',
-    'tests*',
-    'node_modules',
-    'bower_components',
-    'var',
-    '__pycache__',
-    'LC_MESSAGES',
-    'venv*',
+    ".git",
+    "__pycache__",
+    "contrib",
+    "docs",
+    "LC_MESSAGES",
+    "tests*",
+    "var",
+    "venv*",
 ]
 
 

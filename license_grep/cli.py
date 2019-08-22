@@ -3,12 +3,14 @@ import json
 import sys
 
 from license_grep.js import process_js_environment
+from license_grep.output import write_json, write_license_table
 from license_grep.python import process_python_environment
+from license_grep.utils import strip_versions
 
 
-def read_data_from_env():
+def read_data_from_env(directory):
     data = {}
-    process_js_environment(data)
+    process_js_environment(data, directory)
 
     print("Processing Python environment")
     process_python_environment(data)
@@ -17,6 +19,7 @@ def read_data_from_env():
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("-d", "--directory", default=".")
     ap.add_argument("-r", "--read-json", required=False, type=argparse.FileType("r"))
     ap.add_argument("-w", "--write-json", required=False, type=argparse.FileType("w"))
     ap.add_argument("-t", "--write-table", required=False, type=argparse.FileType("w"))
@@ -25,7 +28,7 @@ def main():
     if args.read_json:
         data = json.load(args.read_json)
     else:
-        data = read_data_from_env()
+        data = read_data_from_env(args.directory)
 
     print("%d packages found." % len(data), file=sys.stderr)
     if args.strip_versions:
