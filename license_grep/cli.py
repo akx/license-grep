@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from license_grep.js import process_js_environment
+from license_grep.input.javascript import process_js_environment
 from license_grep.licenses import UnknownLicense, license_name_map
 from license_grep.output import (
     OutputOptions,
@@ -9,7 +9,7 @@ from license_grep.output import (
     write_json,
     write_license_table,
 )
-from license_grep.python import process_python_environment
+from license_grep.input.python import process_python_environment
 
 
 def main():
