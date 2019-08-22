@@ -1,27 +1,15 @@
 import os
-import re
 import sys
-from functools import lru_cache
 from typing import Iterable
 
 from license_grep.deduction import deduce_license_from_dir
+from license_grep.input.cache_dir_utils import get_cache_map
 from license_grep.models import PackageInfo
 
 try:
     import yaml
 except ImportError as ie:
     yaml = ie
-
-
-@lru_cache()
-def get_pub_cache_map(pub_cache_dir):
-    cache_map = {}
-    for path, dirs, files in os.walk(pub_cache_dir):
-        for dir in dirs:
-            m = re.match("^(.+)-(\d+.*)$", dir)
-            if m:
-                cache_map[m.groups()] = os.path.join(path, dir)
-    return cache_map
 
 
 def process_dart_package(package_dir):
@@ -65,7 +53,7 @@ def process_dart_environment(root_directory, pub_cache) -> Iterable[PackageInfo]
         (name, info["version"])
         for (name, info) in pubspec_lock_content["packages"].items()
     ]
-    cache_map = get_pub_cache_map(pub_cache)
+    cache_map = get_cache_map(pub_cache)
     for package_id in package_ids:
         if package_id in cache_map:
             darp = process_dart_package(cache_map[package_id])

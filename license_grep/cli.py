@@ -3,6 +3,7 @@ import sys
 
 from license_grep.input.dart import process_dart_environment
 from license_grep.input.javascript import process_js_environment
+from license_grep.input.rust import process_rust_environment
 from license_grep.licenses import UnknownLicense, license_name_map
 from license_grep.output import (
     OutputOptions,
@@ -18,6 +19,7 @@ def main():
     ap.add_argument("--js", dest="javascript_roots", action="append", default=[])
     ap.add_argument("--py", dest="python_roots", action="append", default=[])
     ap.add_argument("--dart", dest="dart_roots", action="append", default=[])
+    ap.add_argument("--rust", dest="rust_roots", action="append", default=[])
     ap.add_argument("--write-json", required=False, type=argparse.FileType("w"))
     ap.add_argument("--write-table", required=False, type=argparse.FileType("w"))
     ap.add_argument(
@@ -46,6 +48,9 @@ def main():
         package_infos.extend(
             process_dart_environment(dart_root, pub_cache=args.dart_pub_cache)
         )
+
+    for rust_root in args.rust_roots:
+        package_infos.extend(process_rust_environment(rust_root))
 
     print(f"{len(package_infos):d} packages found.", file=sys.stderr)
     n_unknown = 0

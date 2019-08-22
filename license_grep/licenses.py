@@ -74,7 +74,7 @@ def _canonicalize_licenses(raw_licenses) -> Iterable[Tuple[str, Union[str, None]
         if not atom:
             yield (atom, None)
             continue
-
+        atom = str(atom).strip()
         atom = atom.replace("Apache License, Version 2.0", "Apache-2.0")
 
         canonicalized_atom = canonicalize_license(atom)

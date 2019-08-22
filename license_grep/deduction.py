@@ -37,7 +37,11 @@ def deduce_license_from_dir(directory):
     for filename in os.listdir(directory):
         lower_name = filename.lower()
         filename = os.path.join(directory, filename)
-        if lower_name.startswith("license") or lower_name.startswith("readme"):
+        if (
+            lower_name.startswith("license")
+            or lower_name.startswith("readme")
+            or lower_name.startswith("copying")
+        ):
             with open(filename, "r") as license_fp:
                 license = deduce_license_from_text(license_fp.read())
                 if license:

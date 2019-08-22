@@ -1,6 +1,6 @@
 # license-grep
 
-Figures out and collates licenses for a Python/JavaScript/Dart environment.
+Figures out and collates licenses for a Python/JavaScript/Dart/Rust environment.
 
 # Requirements
 
@@ -34,3 +34,17 @@ python3 -m license_grep \
   --dart-pub-cache ./my-flutter-or-dart-root/.pub-cache/ \
   --dump-unknown-licenses
 ```
+
+# Rust support
+
+Very beta, very ad-hoc.
+
+Install the `toml` package, then try
+
+```
+python3 -m license_grep \
+  --rust ./my-rust-app \
+  --dump-unknown-licenses
+```
+
+If things don't work out, ensure you can build your app in the first place and that ``CARGO_HOME`` is set.
